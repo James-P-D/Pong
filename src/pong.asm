@@ -64,27 +64,34 @@ read_key:                   push 50
                             push PLAYER_1_UP_KEY
                             call GetAsyncKeyState
                             cmp ax, 0
-                            jne player_1_up_pressed
+                            je read_key_cont1
+                            call player_1_up_pressed
                             
-                            push PLAYER_1_DOWN_KEY
+read_key_cont1:             push PLAYER_1_DOWN_KEY
                             call GetAsyncKeyState
                             cmp ax, 0
-                            jne player_1_down_pressed
+                            je read_key_cont2
+                            call player_1_down_pressed
                             
-                            push PLAYER_2_UP_KEY
+read_key_cont2:             push PLAYER_2_UP_KEY
                             call GetAsyncKeyState
                             cmp ax, 0
-                            jne player_2_up_pressed
+                            je read_key_cont3
+                            call player_2_up_pressed
                             
-                            push PLAYER_2_DOWN_KEY
+read_key_cont3:             push PLAYER_2_DOWN_KEY
                             call GetAsyncKeyState
                             cmp ax, 0
-                            jne player_2_down_pressed
+                            je read_key_cont4
+                            call player_2_down_pressed
                             
+read_key_cont4:
+
+
                             jmp read_key
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; player_1_up_pressed
+; player_1_up_pressed()
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 player_1_up_pressed:        mov al, byte ptr [player_1_y]
@@ -107,10 +114,10 @@ player_1_up_pressed:        mov al, byte ptr [player_1_y]
                             
                             call draw_player_1
 
-player_1_up_pressed_done:   jmp read_key
+player_1_up_pressed_done:   ret
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; player_1_down_pressed
+; player_1_down_pressed()
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 player_1_down_pressed:      mov al, byte ptr [player_1_y]
@@ -133,10 +140,10 @@ player_1_down_pressed:      mov al, byte ptr [player_1_y]
                             
                             call draw_player_1
                             
-player_1_down_pressed_done: jmp read_key
+player_1_down_pressed_done: ret
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; player_2_up_pressed
+; player_2_up_pressed()
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 player_2_up_pressed:        mov al, byte ptr [player_2_y]
@@ -159,10 +166,10 @@ player_2_up_pressed:        mov al, byte ptr [player_2_y]
                             
                             call draw_player_2
 
-player_2_up_pressed_done:   jmp read_key
+player_2_up_pressed_done:   ret
                             
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; player_2_down_pressed
+; player_2_down_pressed()
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 player_2_down_pressed:      mov al, byte ptr [player_2_y]
@@ -185,8 +192,7 @@ player_2_down_pressed:      mov al, byte ptr [player_2_y]
                             
                             call draw_player_2
                             
-player_2_down_pressed_done: jmp read_key
-                            jmp read_key
+player_2_down_pressed_done: ret
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; end_program

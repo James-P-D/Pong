@@ -53,7 +53,6 @@ start:                      call get_output_handle              ; Get the input/
                             call draw_player_2
                             
 
-
 read_key:                   push 50
                             call Sleep
                             
@@ -133,21 +132,60 @@ player_1_down_pressed:      mov al, byte ptr [player_1_y]
                             call output_string
                             
                             call draw_player_1
-
                             
 player_1_down_pressed_done: jmp read_key
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; player_2_up_pressed
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-player_2_up_pressed:
-                            jmp read_key
+player_2_up_pressed:        mov al, byte ptr [player_2_y]
+                            cmp al, 0
+                            je player_2_up_pressed_done
+
+                            dec al                            
+                            mov byte ptr [player_2_y], al
+                            
+                            mov eax, 0
+                            mov al, byte ptr [player_2_y]
+                            add eax, PADDLE_SIZE
+                            mov ebx, 0
+                            mov bl, byte ptr [player_2_x]
+                            call set_cursor_position
+                            
+                            push SPACE_LEN
+                            push offset SPACE
+                            call output_string
+                            
+                            call draw_player_2
+
+player_2_up_pressed_done:   jmp read_key
                             
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; player_2_down_pressed
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-player_2_down_pressed:
+player_2_down_pressed:      mov al, byte ptr [player_2_y]
+                            cmp al, ROWS - PADDLE_SIZE
+                            je player_2_down_pressed_done
+                            
+                            inc al
+                            mov byte ptr [player_2_y], al
+                            
+                            mov eax, 0
+                            mov al, byte ptr [player_2_y]
+                            dec al
+                            mov ebx, 0
+                            mov bl, byte ptr [player_2_x]
+                            call set_cursor_position
+                            
+                            push SPACE_LEN
+                            push offset SPACE
+                            call output_string
+                            
+                            call draw_player_2
+                            
+player_2_down_pressed_done: jmp read_key
                             jmp read_key
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

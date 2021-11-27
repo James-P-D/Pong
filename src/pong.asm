@@ -58,7 +58,7 @@ BALL_DIR_SE                 equ 0                                   ; South east
 BALL_DIR_SW                 equ 1                                   ; South west movement
 BALL_DIR_NW                 equ 2                                   ; North west movement
 BALL_DIR_NE                 equ 3                                   ; North east movement
-ball_dir                    db BALL_DIR_NE
+ball_dir                    db BALL_DIR_SW
 ball_x                      dw 0
 ball_y                      dw 0
 
@@ -110,7 +110,7 @@ start:                      call get_output_handle                  ; Get the in
                             call draw_ball
                             
 
-game_loop:                  push 200                                 ; RESET THIS IS 20!
+game_loop:                  push 20                                 ; RESET THIS IS 20!
                             call Sleep
                             
                             ;call GetTickCount
@@ -166,7 +166,7 @@ check_ball_dir_se_paddle:   dec ax
                             
                             add bx, PADDLE_SIZE
                             cmp cx, bx
-                            jge draw_new_ball
+                            jg draw_new_ball
                             
                             mov byte ptr [ball_dir], BALL_DIR_SW
                             jmp draw_new_ball
@@ -209,7 +209,7 @@ check_ball_dir_ne_paddle:   dec ax
                             
                             add bx, PADDLE_SIZE
                             cmp cx, bx
-                            jge draw_new_ball
+                            jg draw_new_ball
                             
                             mov byte ptr [ball_dir], BALL_DIR_NW
                             jmp draw_new_ball
@@ -232,13 +232,29 @@ check_ball_dir_nw:          cmp byte ptr [ball_dir], BALL_DIR_NW
                             
 check_ball_dir_nw_wall:     mov ax, 0
                             cmp ax, word ptr [ball_x]
-                            jne draw_new_ball
+                            jne check_ball_dir_nw_paddle
                             
                             call draw_ball
                             push 1000
                             call Sleep
                             
                             jmp player_1_lost
+
+check_ball_dir_nw_paddle:   inc ax
+                            cmp ax, word ptr [ball_x]
+                            jne draw_new_ball
+                            
+                            mov bx, word ptr [player_1_y]
+                            mov cx, word ptr [ball_y]
+                            cmp cx, bx
+                            jl draw_new_ball
+                            
+                            add bx, PADDLE_SIZE
+                            cmp cx, bx
+                            jg draw_new_ball
+                            
+                            mov byte ptr [ball_dir], BALL_DIR_NE
+                            jmp draw_new_ball
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;                            
 ; South West Check
@@ -259,13 +275,29 @@ check_ball_dir_sw:          cmp byte ptr [ball_dir], BALL_DIR_SW
                             
 check_ball_dir_sw_wall:     mov ax, 0
                             cmp ax, word ptr [ball_x]
-                            jne draw_new_ball
+                            jne check_ball_dir_sw_paddle
                             
                             call draw_ball
                             push 1000
                             call Sleep
                             
                             jmp player_1_lost
+
+check_ball_dir_sw_paddle:   inc ax
+                            cmp ax, word ptr [ball_x]
+                            jne draw_new_ball
+                            
+                            mov bx, word ptr [player_1_y]
+                            mov cx, word ptr [ball_y]
+                            cmp cx, bx
+                            jl draw_new_ball
+                            
+                            add bx, PADDLE_SIZE
+                            cmp cx, bx
+                            jg draw_new_ball
+                            
+                            mov byte ptr [ball_dir], BALL_DIR_SE
+                            jmp draw_new_ball
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;                            
 ; Keyboard check

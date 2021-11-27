@@ -166,7 +166,14 @@ check_ball_dir_se_paddle:   dec ax
                             jg draw_new_ball
                             
                             mov byte ptr [ball_dir], BALL_DIR_SW
-                            call update_tick_interval
+                            
+                            add cx, 2
+                            cmp cx, word ptr [rows]
+                            jne check_ball_dir_se_done
+                            
+                            mov byte ptr [ball_dir], BALL_DIR_NW
+                            
+check_ball_dir_se_done:     call update_tick_interval
                             jmp draw_new_ball
                                                         
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;                            
@@ -298,7 +305,14 @@ check_ball_dir_sw_paddle:   inc ax
                             jg draw_new_ball
                             
                             mov byte ptr [ball_dir], BALL_DIR_SE
-                            call update_tick_interval
+                            
+                            add cx, 2
+                            cmp cx, word ptr [rows]
+                            jne check_ball_dir_sw_done
+                            
+                            mov byte ptr [ball_dir], BALL_DIR_NE
+                            
+check_ball_dir_sw_done:     call update_tick_interval
                             jmp draw_new_ball
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;                            

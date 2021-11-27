@@ -18,4 +18,4 @@ c:\masm32\bin\polink.exe /SUBSYSTEM:console pong.obj
 
 Once complete, simply run the `pong.exe` file.
 
-Player 1 can move up and down using <kb>Q</kbd> and <kbd>A</kbd>, whilst player 2 can use <kbd>P</kbd> and <kbd>L</kbd>. To exit the game, press <kbd>ESC</kbd>.
+Player 1 can move up and down using <kbd>Q</kbd> and <kbd>A</kbd>, whilst player 2 can use <kbd>P</kbd> and <kbd>L</kbd>. To exit the game, press <kbd>ESC</kbd>.

@@ -1,3 +1,5 @@
+; TODO: Rename COLS_NEW to cols
+
 .386                  ; 386 Processor Instruction Set
 .model flat, stdcall  ; Flat memory model and stdcall method
 option casemap: none  ; Case Sensitive
@@ -56,7 +58,7 @@ BALL_DIR_SE                 equ 0                                   ; South east
 BALL_DIR_SW                 equ 1                                   ; South west movement
 BALL_DIR_NW                 equ 2                                   ; North west movement
 BALL_DIR_NE                 equ 3                                   ; North east movement
-ball_dir                    db BALL_DIR_SE
+ball_dir                    db BALL_DIR_SW
 ball_x                      dw 0
 ball_y                      dw 0
 
@@ -108,7 +110,7 @@ start:                      call get_output_handle                  ; Get the in
                             call draw_ball
                             
 
-game_loop:                  push 20                                 ; RESET THIS IS 20!
+game_loop:                  push 200                                 ; RESET THIS IS 20!
                             call Sleep
                             
                             ;call GetTickCount
@@ -124,25 +126,120 @@ game_loop:                  push 20                                 ; RESET THIS
                             
                             ; Overwrite the current ball with a space
                             call clear_ball
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;                            
+; South East Check
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;                            
+
+check_ball_dir_se:          cmp byte ptr [ball_dir], BALL_DIR_SE
+                            jne check_ball_dir_ne
                             
-                            ; calculate new ball position
+                            inc word ptr [ball_x]
+                            inc word ptr [ball_y]
                             
-                            ;cmp byte ptr [ball_dir], BALL_DIR_SE
-                            ;jne check_ball_dir_sw
+                            mov ax, word ptr [ROWS_NEW]
+                            sub ax, 2
+                            cmp ax, word ptr [ball_y]
+                            jne check_ball_dir_se_wall
                             
-                            ;inc byte ptr [ball_x]
-                            ;inc byte ptr [ball_y]
-                            ;jmp ??????
+                            mov byte ptr [ball_dir], BALL_DIR_NE                            
                             
-check_ball_dir_sw:                            
+check_ball_dir_se_wall:     mov ax, word ptr [COLS_NEW]
+                            dec ax
+                            cmp ax, word ptr [ball_x]
+                            jne draw_new_ball
                             
-check_ball:                            
-                            ; check if wall
-                            ; check if batt
-                        
                             call draw_ball
+                            push 1000
+                            call Sleep
                             
+                            jmp player_2_lost
                             
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;                            
+; North East Check
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;                            
+
+check_ball_dir_ne:          cmp byte ptr [ball_dir], BALL_DIR_NE
+                            jne check_ball_dir_nw
+                            
+                            inc word ptr [ball_x]
+                            dec word ptr [ball_y]
+                            
+                            mov ax, 0
+                            cmp ax, word ptr [ball_y]
+                            jne check_ball_dir_ne_wall
+                            
+                            mov byte ptr [ball_dir], BALL_DIR_SE
+                            
+check_ball_dir_ne_wall:     mov ax, word ptr [COLS_NEW]
+                            dec ax
+                            cmp ax, word ptr [ball_x]
+                            jne draw_new_ball
+                            
+                            call draw_ball
+                            push 1000
+                            call Sleep
+                            
+                            jmp player_2_lost
+                            
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;                            
+; North West Check
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;                            
+
+check_ball_dir_nw:          cmp byte ptr [ball_dir], BALL_DIR_NW
+                            jne check_ball_dir_sw
+                            
+                            dec word ptr [ball_x]
+                            dec word ptr [ball_y]
+                            
+                            mov ax, 0
+                            cmp ax, word ptr [ball_y]
+                            jne check_ball_dir_nw_wall
+                            
+                            mov byte ptr [ball_dir], BALL_DIR_SW
+                            
+check_ball_dir_nw_wall:     mov ax, 0
+                            cmp ax, word ptr [ball_x]
+                            jne draw_new_ball
+                            
+                            call draw_ball
+                            push 1000
+                            call Sleep
+                            
+                            jmp player_1_lost
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;                            
+; South West Check
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;                            
+
+check_ball_dir_sw:          cmp byte ptr [ball_dir], BALL_DIR_SW
+                            jne end_program
+                            
+                            dec word ptr [ball_x]
+                            inc word ptr [ball_y]
+                            
+                            mov ax, word ptr [ROWS_NEW]
+                            sub ax, 2
+                            cmp ax, word ptr [ball_y]
+                            jne check_ball_dir_sw_wall
+                            
+                            mov byte ptr [ball_dir], BALL_DIR_NW                      
+                            
+check_ball_dir_sw_wall:     mov ax, 0
+                            cmp ax, word ptr [ball_x]
+                            jne draw_new_ball
+                            
+                            call draw_ball
+                            push 1000
+                            call Sleep
+                            
+                            jmp player_1_lost
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;                            
+; Keyboard check
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;                            
+                            
+draw_new_ball:              call draw_ball
                             
 read_key:                   push ESCAPE
                             call GetAsyncKeyState
@@ -185,11 +282,11 @@ player_2_lost:              inc word ptr [player_1_score]
                             
 player_lost:                call clear_ball
                             
-                            mov ax, ROWS_NEW                        ; Get the number of rows..
+                            mov ax, word ptr [ROWS_NEW]                        ; Get the number of rows..
                             shr ax, 1                               ; ..bit-shift-right halves the value..
                             mov word ptr [ball_y], ax               ; ..and use it to set the ball y position
                             
-                            mov ax, COLS_NEW                        ; Get the number of columns again..
+                            mov ax, word ptr [COLS_NEW]                        ; Get the number of columns again..
                             shr ax, 1                               ; ..halve it so we are mid-screen..
                             mov word ptr [ball_x], ax               ; ..and use it to set the ball x position
                            

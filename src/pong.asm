@@ -57,7 +57,7 @@ BALL_DIR_SW                 equ 1                                   ; South west
 BALL_DIR_NW                 equ 2                                   ; North west movement
 BALL_DIR_NE                 equ 3                                   ; North east movement
 
-ball_dir                    db BALL_DIR_SW
+ball_dir                    db BALL_DIR_SE
 ball_x                      dw 0
 ball_y                      dw 0
 
@@ -107,7 +107,7 @@ start:                      call get_output_handle                  ; Get the in
                             call write_player_2_score
                             call draw_ball
 
-game_loop:                  push 20                                 ; RESET THIS IS 20!
+game_loop:                  push 200                                 ; RESET THIS IS 20!
                             call Sleep
                             
                             call GetTickCount
@@ -156,6 +156,7 @@ check_ball_dir_se_paddle:   dec ax
                             jne draw_new_ball
                             
                             mov bx, word ptr [player_2_y]
+                            dec bx
                             mov cx, word ptr [ball_y]
                             cmp cx, bx
                             jl draw_new_ball
@@ -287,6 +288,7 @@ check_ball_dir_sw_paddle:   inc ax
                             jne draw_new_ball
                             
                             mov bx, word ptr [player_1_y]
+                            dec bx
                             mov cx, word ptr [ball_y]
                             cmp cx, bx
                             jl draw_new_ball

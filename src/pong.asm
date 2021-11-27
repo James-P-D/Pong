@@ -61,8 +61,10 @@ ball_dir                    db BALL_DIR_SW
 ball_x                      dw 0
 ball_y                      dw 0
 
-last_clock_ticks            dw 0
-TICK_INTERVAL               dd 10
+last_clock_ticks            dd 0
+DEFAULT_INTERVAL            equ 100
+INTERVAL_STEP               equ 30
+tick_interval               dd DEFAULT_INTERVAL
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; .data? section
@@ -89,7 +91,7 @@ start:                      call get_output_handle                  ; Get the in
                             dec ax                                  ; ..decrease by 1..
                             mov word ptr [player_2_x], ax           ; ..and set the second player x position
                             
-                            mov ax, rows                        ; Get the number of rows..
+                            mov ax, rows                            ; Get the number of rows..
                             shr ax, 1                               ; ..bit-shift-right halves the value..
                             mov word ptr [player_1_y], ax           ; ..and use the mid-point to set player 1 y position..
                             mov word ptr [player_2_y], ax           ; ..and the same for player 2..
@@ -105,19 +107,18 @@ start:                      call get_output_handle                  ; Get the in
                             call write_player_2_score
                             call draw_ball
 
-game_loop:                  push 100                                 ; RESET THIS IS 20!
+game_loop:                  push 20                                 ; RESET THIS IS 20!
                             call Sleep
                             
-                            ;call GetTickCount
-                            ;
-                            ;mov ebx, dword ptr [last_clock_ticks]
-                            ;add ebx, TICK_INTERVAL
-                            ;  
-                            ;cmp eax, ebx
-                            ;jge read_key
-                            ;
-                            ;mov dword ptr [last_clock_ticks], eax
-                                                       
+                            call GetTickCount
+                            
+                            mov ebx, dword ptr [last_clock_ticks]
+                            add ebx, tick_interval
+                              
+                            cmp eax, ebx
+                            jle read_key
+                            
+                            mov dword ptr [last_clock_ticks], eax
                             
                             ; Overwrite the current ball with a space
                             call clear_ball
@@ -164,6 +165,7 @@ check_ball_dir_se_paddle:   dec ax
                             jg draw_new_ball
                             
                             mov byte ptr [ball_dir], BALL_DIR_SW
+                            call update_tick_interval
                             jmp draw_new_ball
                                                         
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;                            
@@ -207,6 +209,7 @@ check_ball_dir_ne_paddle:   dec ax
                             jg draw_new_ball
                             
                             mov byte ptr [ball_dir], BALL_DIR_NW
+                            call update_tick_interval
                             jmp draw_new_ball
                             
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;                            
@@ -249,6 +252,7 @@ check_ball_dir_nw_paddle:   inc ax
                             jg draw_new_ball
                             
                             mov byte ptr [ball_dir], BALL_DIR_NE
+                            call update_tick_interval
                             jmp draw_new_ball
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;                            
@@ -292,6 +296,7 @@ check_ball_dir_sw_paddle:   inc ax
                             jg draw_new_ball
                             
                             mov byte ptr [ball_dir], BALL_DIR_SE
+                            call update_tick_interval
                             jmp draw_new_ball
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;                            
@@ -341,6 +346,8 @@ player_2_lost:              inc word ptr [player_1_score]
                             
 player_lost:                call clear_ball
                             
+                            mov dword ptr [tick_interval], DEFAULT_INTERVAL
+                            
                             mov ax, word ptr [rows]                        ; Get the number of rows..
                             shr ax, 1                               ; ..bit-shift-right halves the value..
                             mov word ptr [ball_y], ax               ; ..and use it to set the ball y position
@@ -365,6 +372,16 @@ end_program:                call clear_screen
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; FUNCTIONS - FUNCTIONS - FUNCTIONS - FUNCTIONS - FUNCTIONS - FUNCTIONS - FUNCTIONS - FUNCTIONS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; update_tick_interval()
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+update_tick_interval:       mov eax, dword ptr [tick_interval]
+                            mov ebx, INTERVAL_STEP
+                            sub eax, ebx
+                            mov dword ptr [tick_interval], eax
+                            ret
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; player_1_up_pressed()

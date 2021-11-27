@@ -108,7 +108,7 @@ start:                      call get_output_handle                  ; Get the in
                             call draw_ball
                             
 
-game_loop:                  push 20
+game_loop:                  push 20                                 ; RESET THIS IS 20!
                             call Sleep
                             
                             ;call GetTickCount
@@ -574,7 +574,7 @@ output_unsigned_byte_finished_calculation:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; clear_screen()
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;al = y bl = x
+
 clear_screen:               mov eax, 0
                             mov ebx, 0
                             
@@ -601,6 +601,9 @@ clear_screen_col_loop:      push eax
                             cmp ax, word ptr[ROWS_NEW]
                             jne clear_screen_col_loop
                             
+                            mov ax, 0
+                            mov bx, 0
+                            call set_cursor_position
                             ret
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

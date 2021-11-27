@@ -58,7 +58,7 @@ BALL_DIR_SE                 equ 0                                   ; South east
 BALL_DIR_SW                 equ 1                                   ; South west movement
 BALL_DIR_NW                 equ 2                                   ; North west movement
 BALL_DIR_NE                 equ 3                                   ; North east movement
-ball_dir                    db BALL_DIR_SW
+ball_dir                    db BALL_DIR_NE
 ball_x                      dw 0
 ball_y                      dw 0
 
@@ -147,7 +147,7 @@ check_ball_dir_se:          cmp byte ptr [ball_dir], BALL_DIR_SE
 check_ball_dir_se_wall:     mov ax, word ptr [COLS_NEW]
                             dec ax
                             cmp ax, word ptr [ball_x]
-                            jne draw_new_ball
+                            jne check_ball_dir_se_paddle
                             
                             call draw_ball
                             push 1000
@@ -155,6 +155,22 @@ check_ball_dir_se_wall:     mov ax, word ptr [COLS_NEW]
                             
                             jmp player_2_lost
                             
+check_ball_dir_se_paddle:   dec ax
+                            cmp ax, word ptr [ball_x]
+                            jne draw_new_ball
+                            
+                            mov bx, word ptr [player_2_y]
+                            mov cx, word ptr [ball_y]
+                            cmp cx, bx
+                            jl draw_new_ball
+                            
+                            add bx, PADDLE_SIZE
+                            cmp cx, bx
+                            jge draw_new_ball
+                            
+                            mov byte ptr [ball_dir], BALL_DIR_SW
+                            jmp draw_new_ball
+                                                        
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;                            
 ; North East Check
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;                            
@@ -174,13 +190,29 @@ check_ball_dir_ne:          cmp byte ptr [ball_dir], BALL_DIR_NE
 check_ball_dir_ne_wall:     mov ax, word ptr [COLS_NEW]
                             dec ax
                             cmp ax, word ptr [ball_x]
-                            jne draw_new_ball
+                            jne check_ball_dir_ne_paddle
                             
                             call draw_ball
                             push 1000
                             call Sleep
                             
                             jmp player_2_lost
+                            
+check_ball_dir_ne_paddle:   dec ax
+                            cmp ax, word ptr [ball_x]
+                            jne draw_new_ball
+                            
+                            mov bx, word ptr [player_2_y]
+                            mov cx, word ptr [ball_y]
+                            cmp cx, bx
+                            jl draw_new_ball
+                            
+                            add bx, PADDLE_SIZE
+                            cmp cx, bx
+                            jge draw_new_ball
+                            
+                            mov byte ptr [ball_dir], BALL_DIR_NW
+                            jmp draw_new_ball
                             
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;                            
 ; North West Check

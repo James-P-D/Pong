@@ -1,5 +1,3 @@
-; TODO: Rename COLS_NEW to cols
-
 .386                  ; 386 Processor Instruction Set
 .model flat, stdcall  ; Flat memory model and stdcall method
 option casemap: none  ; Case Sensitive
@@ -36,14 +34,14 @@ BLOCK_LEN                   equ $ - offset BLOCK
 BALL                        db 'O'
 BALL_LEN                    equ $ - offset BALL
 
-COLS_NEW                    dw 0
-ROWS_NEW                    dw 0
-
 PLAYER_1_UP_KEY             equ 'Q'
 PLAYER_1_DOWN_KEY           equ 'A'
 PLAYER_2_UP_KEY             equ 'P'
 PLAYER_2_DOWN_KEY           equ 'L'
 ESCAPE                      equ 27
+
+cols                        dw 0
+rows                        dw 0
 
 player_1_score              dw 0
 player_2_score              dw 0
@@ -58,6 +56,7 @@ BALL_DIR_SE                 equ 0                                   ; South east
 BALL_DIR_SW                 equ 1                                   ; South west movement
 BALL_DIR_NW                 equ 2                                   ; North west movement
 BALL_DIR_NE                 equ 3                                   ; North east movement
+
 ball_dir                    db BALL_DIR_SW
 ball_x                      dw 0
 ball_y                      dw 0
@@ -86,31 +85,27 @@ start:                      call get_output_handle                  ; Get the in
                             call GetTickCount                            
                             mov dword ptr [last_clock_ticks], eax
                                                         
-                            mov ax, COLS_NEW                        ; Get the number of columns..
+                            mov ax, cols                            ; Get the number of columns..
                             dec ax                                  ; ..decrease by 1..
                             mov word ptr [player_2_x], ax           ; ..and set the second player x position
                             
-                            mov ax, ROWS_NEW                        ; Get the number of rows..
+                            mov ax, rows                        ; Get the number of rows..
                             shr ax, 1                               ; ..bit-shift-right halves the value..
                             mov word ptr [player_1_y], ax           ; ..and use the mid-point to set player 1 y position..
                             mov word ptr [player_2_y], ax           ; ..and the same for player 2..
                             mov word ptr [ball_y], ax               ; ..and for the ball
                             
-                            mov ax, COLS_NEW                        ; Get the number of columns again..
+                            mov ax, cols                            ; Get the number of columns again..
                             shr ax, 1                               ; ..halve it so we are mid-screen..
                             mov word ptr [ball_x], ax               ; ..and use it to set the ball x position
-                            
-                            
-                            
                             
                             call draw_player_1
                             call draw_player_2
                             call write_player_1_score
                             call write_player_2_score
                             call draw_ball
-                            
 
-game_loop:                  push 20                                 ; RESET THIS IS 20!
+game_loop:                  push 100                                 ; RESET THIS IS 20!
                             call Sleep
                             
                             ;call GetTickCount
@@ -137,14 +132,14 @@ check_ball_dir_se:          cmp byte ptr [ball_dir], BALL_DIR_SE
                             inc word ptr [ball_x]
                             inc word ptr [ball_y]
                             
-                            mov ax, word ptr [ROWS_NEW]
+                            mov ax, word ptr [rows]
                             sub ax, 2
                             cmp ax, word ptr [ball_y]
                             jne check_ball_dir_se_wall
                             
                             mov byte ptr [ball_dir], BALL_DIR_NE                            
                             
-check_ball_dir_se_wall:     mov ax, word ptr [COLS_NEW]
+check_ball_dir_se_wall:     mov ax, word ptr [cols]
                             dec ax
                             cmp ax, word ptr [ball_x]
                             jne check_ball_dir_se_paddle
@@ -187,7 +182,7 @@ check_ball_dir_ne:          cmp byte ptr [ball_dir], BALL_DIR_NE
                             
                             mov byte ptr [ball_dir], BALL_DIR_SE
                             
-check_ball_dir_ne_wall:     mov ax, word ptr [COLS_NEW]
+check_ball_dir_ne_wall:     mov ax, word ptr [cols]
                             dec ax
                             cmp ax, word ptr [ball_x]
                             jne check_ball_dir_ne_paddle
@@ -266,7 +261,7 @@ check_ball_dir_sw:          cmp byte ptr [ball_dir], BALL_DIR_SW
                             dec word ptr [ball_x]
                             inc word ptr [ball_y]
                             
-                            mov ax, word ptr [ROWS_NEW]
+                            mov ax, word ptr [rows]
                             sub ax, 2
                             cmp ax, word ptr [ball_y]
                             jne check_ball_dir_sw_wall
@@ -346,11 +341,11 @@ player_2_lost:              inc word ptr [player_1_score]
                             
 player_lost:                call clear_ball
                             
-                            mov ax, word ptr [ROWS_NEW]                        ; Get the number of rows..
+                            mov ax, word ptr [rows]                        ; Get the number of rows..
                             shr ax, 1                               ; ..bit-shift-right halves the value..
                             mov word ptr [ball_y], ax               ; ..and use it to set the ball y position
                             
-                            mov ax, word ptr [COLS_NEW]                        ; Get the number of columns again..
+                            mov ax, word ptr [cols]                        ; Get the number of columns again..
                             shr ax, 1                               ; ..halve it so we are mid-screen..
                             mov word ptr [ball_x], ax               ; ..and use it to set the ball x position
                            
@@ -402,7 +397,7 @@ player_1_up_pressed_done:   ret
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 player_1_down_pressed:      mov ax, word ptr [player_1_y]
-                            mov bx, ROWS_NEW
+                            mov bx, rows
                             sub bx, PADDLE_SIZE
                             dec bx                            
                             cmp ax, bx
@@ -457,7 +452,7 @@ player_2_up_pressed_done:   ret
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 player_2_down_pressed:      mov ax, word ptr [player_2_y]
-                            mov bx, ROWS_NEW
+                            mov bx, rows
                             sub bx, PADDLE_SIZE
                             dec bx
                             cmp ax, bx
@@ -485,9 +480,9 @@ player_2_down_pressed_done: ret
 ; write_player_1_score()
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-write_player_1_score:       mov ax, word ptr [ROWS_NEW]
+write_player_1_score:       mov ax, word ptr [rows]
                             dec ax
-                            mov bx, word ptr [COLS_NEW]
+                            mov bx, word ptr [cols]
                             shr bx, 2
                             call set_cursor_position
                             
@@ -500,13 +495,13 @@ write_player_1_score:       mov ax, word ptr [ROWS_NEW]
 ; write_player_2_score()
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-write_player_2_score:       mov ax, word ptr [COLS_NEW]
+write_player_2_score:       mov ax, word ptr [cols]
                             shr ax, 2
                             mov bx, 3
                             mul bx
                             mov bx, ax
                             
-                            mov ax, word ptr [ROWS_NEW]
+                            mov ax, word ptr [rows]
                             dec ax
                             
                             call set_cursor_position
@@ -627,13 +622,13 @@ get_console_settings:       lea eax, [console_buffer_info]
                             mov bx, word ptr [console_buffer_info.srWindow.Left]
                             sub ax, bx
                             inc ax
-                            mov word ptr [COLS_NEW], ax 
+                            mov word ptr [cols], ax 
                             
                             mov ax, word ptr [console_buffer_info.srWindow.Bottom]
                             mov bx, word ptr [console_buffer_info.srWindow.Top]
                             sub ax, bx
                             inc ax
-                            mov word ptr [ROWS_NEW], ax 
+                            mov word ptr [rows], ax 
                             
                             ret
 
@@ -754,12 +749,12 @@ clear_screen_col_loop:      push eax
                             pop eax
                             
                             inc ebx
-                            cmp bx, word ptr [COLS_NEW]
+                            cmp bx, word ptr [cols]
                             jne clear_screen_col_loop
                             
                             mov ebx, 0
                             inc eax
-                            cmp ax, word ptr[ROWS_NEW]
+                            cmp ax, word ptr[rows]
                             jne clear_screen_col_loop
                             
                             mov ax, 0

@@ -9,7 +9,7 @@ Pong game in x86 Assembler
 
 ## Building
 
-This program was built with MASM32. It should be possible to compile it with the following:
+This program was built with [MASM32](https://www.masm32.com/). It should be possible to compile it with the following:
 
 ```
 c:\masm32\bin\ml.exe /c /coff pong.asm
